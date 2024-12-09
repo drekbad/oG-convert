@@ -16,7 +16,7 @@ def parse_nmap_grepable(input_file, output_file):
                 hostname = hostname_match.group(1) if hostname_match else ''
                 
                 # Extract Ports
-                ports_match = re.search(r'Ports: (.+?)\s+Ignored State:', line)
+                ports_match = re.search(r'Ports: (.+?)\s+(Ignored State|Seq Index|$)', line)
                 ports = ports_match.group(1) if ports_match else ''
                 
                 # Extract just the port numbers
@@ -26,6 +26,10 @@ def parse_nmap_grepable(input_file, output_file):
                         port_details = port.split('/')
                         if len(port_details) > 1 and port_details[1] == 'open':
                             port_numbers.append(port_details[0])
+                
+                # Skip the line if no open ports are found
+                if not port_numbers:
+                    continue
                 
                 # Format as <IP>,hostname,80/443/5060
                 formatted_line = f"{ip},{hostname},{'/'.join(port_numbers)}"
